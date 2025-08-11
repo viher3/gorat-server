@@ -14,5 +14,8 @@ func main() {
 	fmt.Println("Server is running at:", cfg.GetFullServerAddress())
 
 	// Start the WebSocket server
-	log.Fatal(websocket.StartServer(cfg.GetFullServerAddress()))
+	if cfg.ServerMode == "websocket" {
+		log.Fatal(websocket.StartServer(cfg.GetFullServerAddress()))
+	}
+
 }
