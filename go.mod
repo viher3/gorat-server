@@ -1,0 +1,1 @@
+module github.com/viher3/gorat-server
