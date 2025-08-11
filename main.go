@@ -2,8 +2,12 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/viher3/gorat-server/config"
 )
 
 func main() {
-	fmt.Println("GoRat Server v0.0.1")
+	cfg := config.NewConfig()
+	fmt.Println("GoRat Server v" + config.AppVersion)
+	fmt.Println("Server is running at:", cfg.GetFullServerAddress())
 }
