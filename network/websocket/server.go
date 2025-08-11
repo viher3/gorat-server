@@ -30,14 +30,33 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	for {
 		messageType, message, err := conn.ReadMessage()
 		if err != nil {
-			log.Printf("Error reading message: %v", err)
+			// Check if it's a normal closure
+			if websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure, websocket.CloseNormalClosure) {
+				log.Println("Client disconnected")
+			} else {
+				log.Printf("Error reading message: %v", err)
+			}
 			break
 		}
 
-		log.Printf("Received: %s", message)
+		log.Printf("Received: %s. MessageType: %d", message, messageType)
 
-		// Echo the message back to client
-		err = conn.WriteMessage(messageType, message)
+		// Handle different message types
+		switch messageType {
+		case websocket.TextMessage:
+			// Echo the text message
+			err = conn.WriteMessage(websocket.TextMessage, []byte("Echo: "+string(message)))
+		case websocket.BinaryMessage:
+			// Echo the binary message
+			err = conn.WriteMessage(websocket.BinaryMessage, message)
+		case websocket.PingMessage:
+			// Respond with Pong
+			err = conn.WriteMessage(websocket.PongMessage, message)
+		default:
+			log.Printf("Unknown message type: %d", messageType)
+			continue
+		}
+
 		if err != nil {
 			log.Printf("Error writing message: %v", err)
 			break
