@@ -44,6 +44,13 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 		// Handle different message types
 		switch messageType {
 		case websocket.TextMessage:
+			wsMessage, wsMessageErr := NewWsMessageFromJSON(string(message))
+			if wsMessageErr != nil {
+				log.Printf("Failed to parse WebSocket message: %s", message)
+				continue
+			}
+			log.Printf("Parsed WebSocket message: ID=%s, Payload=%v", wsMessage.ID, wsMessage.Payload)
+
 			// Echo the text message
 			err = conn.WriteMessage(websocket.TextMessage, []byte("Echo: "+string(message)))
 		case websocket.BinaryMessage:
