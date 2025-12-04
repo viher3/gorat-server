@@ -23,7 +23,7 @@ func NewConfig() *Config {
 	// Command-line flags
 	hostname := flag.String("ip", defaultHostname, "IP address to bind the server")
 	port := flag.String("port", defaultPort, "Port to bind the server")
-	serverMode := flag.String("mode", defaultServerMode, "Server mode (websocket or http)")
+	serverMode := flag.String("mode", defaultServerMode, "Server mode (socket or http)")
 
 	// Parse the arguments
 	flag.Parse()
