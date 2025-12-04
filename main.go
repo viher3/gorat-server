@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/viher3/gorat-server/config"
+	"github.com/viher3/gorat-server/network/socket"
 	"github.com/viher3/gorat-server/network/websocket"
 )
 
@@ -16,6 +17,10 @@ func main() {
 	// Start the WebSocket server
 	if cfg.ServerMode == "websocket" {
 		log.Fatal(websocket.StartServer(cfg.GetFullServerAddress()))
+	}
+
+	if cfg.ServerMode == "socket" {
+		log.Fatal(socket.StartServer(cfg.GetFullServerAddress()))
 	}
 
 }

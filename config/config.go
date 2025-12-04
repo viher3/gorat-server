@@ -18,7 +18,7 @@ func NewConfig() *Config {
 	// Default values
 	defaultHostname := "192.168.1.0"
 	defaultPort := "8000"
-	defaultServerMode := "websocket"
+	defaultServerMode := "socket"
 
 	// Command-line flags
 	hostname := flag.String("ip", defaultHostname, "IP address to bind the server")
