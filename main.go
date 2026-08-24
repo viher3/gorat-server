@@ -5,7 +5,6 @@ import (
 
 	"github.com/viher3/gorat-server/config"
 	"github.com/viher3/gorat-server/network/socket"
-	"github.com/viher3/gorat-server/network/websocket"
 	"github.com/viher3/gorat-server/shared/logger"
 )
 
@@ -18,8 +17,6 @@ func main() {
 
 	var err error
 	switch cfg.ServerMode {
-	case "websocket":
-		err = websocket.StartServer(cfg.GetFullServerAddress(), netLog)
 	case "socket":
 		err = socket.StartServer(cfg.GetFullServerAddress(), netLog)
 	default:
