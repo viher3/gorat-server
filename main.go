@@ -1,26 +1,32 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"os"
 
 	"github.com/viher3/gorat-server/config"
 	"github.com/viher3/gorat-server/network/socket"
 	"github.com/viher3/gorat-server/network/websocket"
+	"github.com/viher3/gorat-server/shared/logger"
 )
 
 func main() {
+	appLog := logger.New("app")
+	netLog := logger.New("network")
+
 	cfg := config.NewConfig()
-	fmt.Println("GoRat Server v" + config.AppVersion)
-	fmt.Println("Server is running at:", cfg.GetFullServerAddress())
+	appLog.Info("starting gorat-server", "version", config.AppVersion, "address", cfg.GetFullServerAddress(), "mode", cfg.ServerMode)
 
-	// Start the WebSocket server
-	if cfg.ServerMode == "websocket" {
-		log.Fatal(websocket.StartServer(cfg.GetFullServerAddress()))
+	var err error
+	switch cfg.ServerMode {
+	case "websocket":
+		err = websocket.StartServer(cfg.GetFullServerAddress(), netLog)
+	case "socket":
+		err = socket.StartServer(cfg.GetFullServerAddress(), netLog)
+	default:
+		appLog.Error("unknown server mode", "mode", cfg.ServerMode)
+		os.Exit(1)
 	}
 
-	if cfg.ServerMode == "socket" {
-		log.Fatal(socket.StartServer(cfg.GetFullServerAddress()))
-	}
-
+	appLog.Error("server stopped", "mode", cfg.ServerMode, "error", err)
+	os.Exit(1)
 }
