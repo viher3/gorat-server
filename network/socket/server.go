@@ -17,6 +17,11 @@ func StartServer(address string, log *slog.Logger) error {
 
 	log.Info("socket server listening", "address", address)
 
+	// init clients manager
+	//clients := connectedClients.NewClients()
+	//log.Info("clients manager initialized", "count", clients.Count())
+
+	// accept connections in a loop
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
