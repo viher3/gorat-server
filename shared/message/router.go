@@ -1,5 +1,5 @@
 // Package message decodes the JSON envelope received over the wire
-// ({"type": "...", "payload": {...}}) into a concrete commandbus.Command.
+// ({"action": "...", "payload": {...}}) into a concrete commandbus.Command.
 package message
 
 import (
@@ -11,11 +11,11 @@ import (
 )
 
 type Envelope struct {
-	Type    string          `json:"type"`
+	Action  string          `json:"action"`
 	Payload json.RawMessage `json:"payload"`
 }
 
-// Decoder turns a raw JSON payload into the concrete Command for one message type.
+// Decoder turns a raw JSON payload into the concrete Command for one message action.
 type Decoder func(payload json.RawMessage) (commandbus.Command, error)
 
 type Router struct {
@@ -27,14 +27,14 @@ func NewRouter() *Router {
 	return &Router{decoders: make(map[string]Decoder)}
 }
 
-// Register binds a wire type name to the Decoder that builds its Command.
-func (r *Router) Register(msgType string, decode Decoder) {
+// Register binds a wire action name to the Decoder that builds its Command.
+func (r *Router) Register(msgAction string, decode Decoder) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.decoders[msgType] = decode
+	r.decoders[msgAction] = decode
 }
 
-// Decode parses the envelope and builds the Command for its type.
+// Decode parses the envelope and builds the Command for its action.
 func (r *Router) Decode(raw []byte) (commandbus.Command, error) {
 	var env Envelope
 	if err := json.Unmarshal(raw, &env); err != nil {
@@ -42,10 +42,10 @@ func (r *Router) Decode(raw []byte) (commandbus.Command, error) {
 	}
 
 	r.mu.RLock()
-	decode, ok := r.decoders[env.Type]
+	decode, ok := r.decoders[env.Action]
 	r.mu.RUnlock()
 	if !ok {
-		return nil, fmt.Errorf("message: unknown type %q", env.Type)
+		return nil, fmt.Errorf("message: unknown action %q", env.Action)
 	}
 	return decode(env.Payload)
 }
