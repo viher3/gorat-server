@@ -2,14 +2,18 @@ package socket
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"io"
 	"log/slog"
 	"net"
 	"strings"
+
+	"github.com/viher3/gorat-server/shared/commandbus"
+	"github.com/viher3/gorat-server/shared/message"
 )
 
-func StartServer(address string, log *slog.Logger) error {
+func StartServer(address string, log *slog.Logger, bus *commandbus.Bus, router *message.Router) error {
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return err
@@ -29,11 +33,11 @@ func StartServer(address string, log *slog.Logger) error {
 			log.Error("failed to accept connection", "error", err)
 			continue
 		}
-		go handleConnection(conn, log)
+		go handleConnection(conn, log, bus, router)
 	}
 }
 
-func handleConnection(conn net.Conn, log *slog.Logger) {
+func handleConnection(conn net.Conn, log *slog.Logger, bus *commandbus.Bus, router *message.Router) {
 	defer conn.Close()
 
 	connLog := log.With("remote_addr", conn.RemoteAddr().String())
@@ -42,14 +46,24 @@ func handleConnection(conn net.Conn, log *slog.Logger) {
 
 	reader := bufio.NewReader(conn)
 	for {
-		message, err := reader.ReadString('\n')
+		line, err := reader.ReadString('\n')
 		if err != nil {
 			if !errors.Is(err, io.EOF) {
 				connLog.Error("failed to read message", "error", err)
 			}
 			return
 		}
-		parsedMessage := strings.TrimSuffix(message, "\n")
+		parsedMessage := strings.TrimSuffix(line, "\n")
 		connLog.Info("message received", "message", parsedMessage)
+
+		cmd, err := router.Decode([]byte(parsedMessage))
+		if err != nil {
+			connLog.Error("failed to decode message", "error", err)
+			continue
+		}
+
+		if _, err := bus.Dispatch(context.Background(), cmd); err != nil {
+			connLog.Error("failed to dispatch command", "error", err)
+		}
 	}
 }
