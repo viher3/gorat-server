@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"net"
+	"strings"
 )
 
 func StartServer(address string, log *slog.Logger) error {
@@ -48,6 +49,7 @@ func handleConnection(conn net.Conn, log *slog.Logger) {
 			}
 			return
 		}
-		connLog.Info("message received", "message", message)
+		parsedMessage := strings.TrimSuffix(message, "\n")
+		connLog.Info("message received", "message", parsedMessage)
 	}
 }
