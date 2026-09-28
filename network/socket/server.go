@@ -3,6 +3,7 @@ package socket
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"log/slog"
@@ -54,9 +55,14 @@ func handleConnection(conn net.Conn, log *slog.Logger, bus *commandbus.Bus, rout
 			return
 		}
 		parsedMessage := strings.TrimSuffix(line, "\n")
-		connLog.Info("message received", "message", parsedMessage)
+		var envelope message.Envelope
+		if err := json.Unmarshal([]byte(parsedMessage), &envelope); err != nil {
+			connLog.Error("failed to parse message JSON", "error", err)
+			continue
+		}
 
 		cmd, err := router.Decode([]byte(parsedMessage))
+
 		if err != nil {
 			connLog.Error("failed to decode message", "error", err)
 			continue

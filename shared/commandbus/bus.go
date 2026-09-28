@@ -33,6 +33,8 @@ func (b *Bus) Register(cmd Command, handler Handler) {
 
 // Dispatch routes cmd to its registered handler.
 func (b *Bus) Dispatch(ctx context.Context, cmd Command) (any, error) {
+	fmt.Println("Dispatching command of type:", reflect.TypeOf(cmd))
+	fmt.Println("Registered handlers:", b.handlers)
 	b.mu.RLock()
 	handler, ok := b.handlers[reflect.TypeOf(cmd)]
 	b.mu.RUnlock()

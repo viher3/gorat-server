@@ -18,7 +18,7 @@ func NewClient(id, name, publicIP, privateIP string) *Client {
 		PublicIP:    publicIP,
 		PrivateIP:   privateIP,
 		isConnected: true,
-		lastSeen:    0,
+		lastSeen:    time.Now().Unix(),
 	}
 }
 
